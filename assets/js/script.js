@@ -1,36 +1,61 @@
 //API variables
-let apiKey = "690c3a6b7201e389fe103be085cb462f";
-let cityName = "Manila";
-let queryURL =
-  "https://api.openweathermap.org/data/2.5/forecast?q=" +
-  cityName +
-  "&appid=" +
-  apiKey;
+let cityName = [];
 
 let todayDiv = $("#today");
 let forecastDiv = $("#forecast");
 let cityHistory = $("#history");
+//AJAX
+function renderForecast() {
+  let apiKey = "690c3a6b7201e389fe103be085cb462f";
+  let city = $("#search-input").val();
+  let queryUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}`;
+
+  $.ajax({
+    url: queryUrl,
+    method: "GET",
+  }).then(function (response) {
+    console.log(response.list[0]); //Test if correct
+    let currentForcast = response.list[0];
+    let kelvin = currentForcast.main.temp;
+    let celcius = kelvin - 273.15;
+
+    let todayCard = $("<div>").attr("class", "card");
+    let todayCardBody = $("<div>").attr("class", "card-body");
+    let cityHeading = $("<h4>").attr("class", "font-weight-bold");
+    cityHeading.text(`${city}  ${currentDay}`);
+    let todayTemp = $("<p>");
+    todayTemp.text(`Temp: ${celcius}`);
+    let todayWind = $("<p>");
+    todayWind.text(`Wind: ${currentForcast.wind.speed}`);
+    let todayHumi = $("<p>");
+    todayHumi.text(`Humidity: ${currentForcast.main.humidity}`);
+
+    todayDiv.append(todayCard);
+    todayCard.append(todayCardBody);
+    todayCardBody.append(cityHeading, todayTemp, todayWind, todayHumi);
+  });
+}
 
 //moment.js
 let currentHour = moment().hour();
 let currentDay = moment().format("DD/MM/YY");
 
-//Todays forcast
-let todayCard = $("<div>").attr("class", "card");
-let todayCardBody = $("<div>").attr("class", "card-body");
-let cityHeading = $("<h4>").attr("class", "font-weight-bold");
-cityHeading.text(`${cityName}  ${currentDay}`);
-let todayTemp = $("<p>");
-todayTemp.text(`Temp: `);
-let todayWind = $("<p>");
-todayWind.text(`Wind: `);
-let todayHumi = $("<p>");
-todayHumi.text(`Humidity: `);
+/* //Todays forcast
+// let todayCard = $("<div>").attr("class", "card");
+// let todayCardBody = $("<div>").attr("class", "card-body");
+// let cityHeading = $("<h4>").attr("class", "font-weight-bold");
+// cityHeading.text(`${cityName}  ${currentDay}`);
+// let todayTemp = $("<p>");
+// todayTemp.text(`Temp: `);
+// let todayWind = $("<p>");
+// todayWind.text(`Wind: `);
+// let todayHumi = $("<p>");
+// todayHumi.text(`Humidity: `);
 
-todayDiv.append(todayCard);
-todayCard.append(todayCardBody);
-todayCardBody.append(cityHeading, todayTemp, todayWind, todayHumi);
-
+// todayDiv.append(todayCard);
+// todayCard.append(todayCardBody);
+// todayCardBody.append(cityHeading, todayTemp, todayWind, todayHumi);
+ */
 //5-Day forecast
 let forecastHeading = $("<h4>").attr("class", "font-weight-bold");
 forecastHeading.text("5-Day Forecast:");
@@ -51,37 +76,31 @@ forecastDeck.append(forecastCard);
 forecastCard.append(forecastCardBody);
 forecastCardBody.append(forecastDate, forecastTemp, forecastWind, forecastHumi);
 
-//AJAX
+function renderCityButtons() {
+  cityHistory.empty();
+  for (i = 0; i < cityName.length; i++) {
+    let cityButton = $("<li>");
 
-// $.ajax({
-//   url: queryURL,
-//   method: "GET",
-// }).then(function (response) {
-//   console.log(response);
-// });
+    cityButton.text(cityName[i]);
 
-// function renderCityButtons() {
-//   cityHistory.empty();
-//   for (i = 0; i < cityName.length; i++) {
-//     let cityButton = $("<li>");
+    cityButton.addClass("btn btn-outline-dark mb-1 city-btn");
 
-//     cityButton.text(cityName[i]);
+    cityButton.attr("data-city", cityName[i]);
 
-//     cityButton.addClass("btn btn-outline-dark mb-1");
-
-//     cityButton.attr("data-city", cityName[i]);
-
-//     cityHistory.append(cityButton);
-//   }
-// }
+    cityHistory.append(cityButton);
+  }
+}
 
 $("#search-form").on("submit", function (event) {
   let input = $("#search-input").val();
   event.preventDefault();
 
   cityName.push(input);
-  // renderCityButtons();
+
+  renderCityButtons();
+  todayDiv.empty();
+  renderForecast();
 });
 
-// "https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid=" +
 //geocoding api?
+// "https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid=" +
