@@ -5,11 +5,12 @@ user inputs city
 city added to query url
 ajax call uses queryurl to retieve payload
 save city into button
-save city forecast into local storage
 when new city is searched
 clear current divs
 display new city forecast
-
+when previous city button is pressed
+clear current divs
+display past city current forecast
 */
 //-----------------
 
@@ -30,11 +31,12 @@ function findCity(event) {
   let queryUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}${apiKey}`;
 
   todayDiv.empty();
+  forecastDiv.empty();
   $.ajax({
     url: queryUrl,
     method: "GET",
   }).then(function (response) {
-    // console.log(response); //Test if correct
+    console.log(response); //Test if correct
     renderForecast(response);
     /* //render 5-day forcast
     futureForecast(response); */
@@ -45,17 +47,34 @@ function findCity(event) {
 }
 
 function renderForecast(response) {
+  //create main forecast elements
   let todayCard = $("<div>").attr("class", "card");
   let todayCardBody = $("<div>").attr("class", "card-body");
+
+  //main forecast information
+  //heading
   let cityHeading = $("<h4>").attr("class", "font-weight-bold");
-  cityHeading.text(`${response.city.name}  ${currentDay}`);
+  cityHeading.text(`${response.city.name}  (${currentDay})`);
+  //temp
   let currentForcast = response.list[0];
-  let kelvin = currentForcast.main.temp;
-  let celcius = `${kelvin - 273.15}\u00B0C`;
+  let kelToCel = currentForcast.main.temp - 273.15;
+  let celcius = Math.round(kelToCel * 10) / 10;
   let todayTemp = $("<p>");
-  todayTemp.text(`Temp: ${celcius}`);
+  todayTemp.text(`Temp: ${celcius}°C`);
+  //weather icon
+  let icon = $("<img>");
+  let fcIcon = currentForcast.weather[0].icon;
+  icon.attr(
+    { src: `http://openweathermap.org/img/wn/${fcIcon}@2x.png` },
+    { alt: `${currentForcast.weather[0].description}` },
+    { width: "50" },
+    { height: "50" }
+  );
+  cityHeading.append(icon);
+  //wind
   let todayWind = $("<p>");
   todayWind.text(`Wind: ${currentForcast.wind.speed} KPH`);
+  //humidity
   let todayHumi = $("<p>");
   todayHumi.text(`Humidity: ${currentForcast.main.humidity}%`);
 
@@ -66,16 +85,20 @@ function renderForecast(response) {
 
 //5-Day forecast
 function futureForecast() {
-  for (let i = 0; i < 5; i++) {
-    let forecastHeading = $("<h4>").attr("class", "font-weight-bold");
-    forecastHeading.text("5-Day Forecast:");
-    let forecastDeck = $("<div>").attr("class", "card-deck");
-    forecastDiv.append(forecastHeading, forecastDeck);
+  let forecastHeading = $("<h4>").attr("class", "font-weight-bold");
+  forecastHeading.text("5-Day Forecast:");
+  let forecastDeck = $("<div>").attr("class", "card-deck");
+  forecastDiv.append(forecastHeading, forecastDeck);
 
-    let forecastCard = $("<div>").attr("class", "card");
+  for (let i = 0; i < 5; i++) {
+    //create forecast cards
+    let forecastCard = $("<div>").attr("class", `card fc-${i}`);
     let forecastCardBody = $("<div>").attr("class", "card-body");
+
+    //forecast card information
+    let nextDay = moment().add(i, "d");
     let forecastDate = $("<h5>");
-    forecastDate.text(currentDay);
+    forecastDate.text(nextDay.format("DD/MM/YY"));
     let forecastTemp = $("<p>");
     forecastTemp.text(`Temp: `);
     let forecastWind = $("<p>");
@@ -83,6 +106,7 @@ function futureForecast() {
     let forecastHumi = $("<p>");
     forecastHumi.text(`Humidity: `);
 
+    //append info to cards, cards to forecast deck
     forecastDeck.append(forecastCard);
     forecastCard.append(forecastCardBody);
     forecastCardBody.append(
@@ -99,7 +123,6 @@ function renderCityButtons() {
   //push input into cityName array
   cityName.push(input);
 
-  console.log(cityName);
   cityHistory.empty();
 
   //create a button for every item in array
@@ -124,7 +147,7 @@ function getPastForcast(event) {
   let queryUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${input}${apiKey}`;
 
   todayDiv.empty();
-
+  forecastDiv.empty();
   $.ajax({
     url: queryUrl,
     method: "GET",
@@ -148,6 +171,7 @@ function getPastForcast(event) {
     todayCard.append(todayCardBody);
     todayCardBody.append(cityHeading, todayTemp, todayWind, todayHumi);
   });
+  futureForecast();
 }
 
 //event listeners
