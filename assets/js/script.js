@@ -13,9 +13,6 @@ display new city forecast
 */
 //-----------------
 
-//API variables
-let cityName = [];
-
 //moment.js
 let currentHour = moment().hour();
 let currentDay = moment().format("DD/MM/YY");
@@ -24,31 +21,34 @@ let todayDiv = $("#today");
 let forecastDiv = $("#forecast");
 let cityHistory = $("#history");
 let searchBtn = $("#search-button");
-let apiKey = "&appid=690c3a6b7201e389fe103be085cb462f";
+let cityName = [];
 
-function findCity() {
+function findCity(event) {
+  event.preventDefault();
   let city = $("#search-input").val();
+  let apiKey = "&appid=690c3a6b7201e389fe103be085cb462f";
   let queryUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}${apiKey}`;
 
+  todayDiv.empty();
   $.ajax({
     url: queryUrl,
     method: "GET",
   }).then(function (response) {
     // console.log(response); //Test if correct
     renderForecast(response);
-
-    /* //render future forecast
-    renderForecast(response);
-    //render 5-day forcast
+    /* //render 5-day forcast
     futureForecast(response); */
+    futureForecast();
   });
+  //generate button into city history
+  renderCityButtons();
 }
 
 function renderForecast(response) {
   let todayCard = $("<div>").attr("class", "card");
   let todayCardBody = $("<div>").attr("class", "card-body");
   let cityHeading = $("<h4>").attr("class", "font-weight-bold");
-  cityHeading.text(`${response.name}  ${currentDay}`);
+  cityHeading.text(`${response.city.name}  ${currentDay}`);
   let currentForcast = response.list[0];
   let kelvin = currentForcast.main.temp;
   let celcius = `${kelvin - 273.15}\u00B0C`;
@@ -65,30 +65,33 @@ function renderForecast(response) {
 }
 
 //5-Day forecast
-function futureForecast(response) {
-  let forecastHeading = $("<h4>").attr("class", "font-weight-bold");
-  forecastHeading.text("5-Day Forecast:");
-  let forecastDeck = $("<div>").attr("class", "card-deck");
-  let forecastCard = $("<div>").attr("class", "card");
-  let forecastCardBody = $("<div>").attr("class", "card-body");
-  let forecastDate = $("<h5>");
-  forecastDate.text(currentDay);
-  let forecastTemp = $("<p>");
-  forecastTemp.text(`Temp: `);
-  let forecastWind = $("<p>");
-  forecastWind.text(`Wind: `);
-  let forecastHumi = $("<p>");
-  forecastHumi.text(`Humidity: `);
+function futureForecast() {
+  for (let i = 0; i < 5; i++) {
+    let forecastHeading = $("<h4>").attr("class", "font-weight-bold");
+    forecastHeading.text("5-Day Forecast:");
+    let forecastDeck = $("<div>").attr("class", "card-deck");
+    forecastDiv.append(forecastHeading, forecastDeck);
 
-  forecastDiv.append(forecastHeading, forecastDeck);
-  forecastDeck.append(forecastCard);
-  forecastCard.append(forecastCardBody);
-  forecastCardBody.append(
-    forecastDate,
-    forecastTemp,
-    forecastWind,
-    forecastHumi
-  );
+    let forecastCard = $("<div>").attr("class", "card");
+    let forecastCardBody = $("<div>").attr("class", "card-body");
+    let forecastDate = $("<h5>");
+    forecastDate.text(currentDay);
+    let forecastTemp = $("<p>");
+    forecastTemp.text(`Temp: `);
+    let forecastWind = $("<p>");
+    forecastWind.text(`Wind: `);
+    let forecastHumi = $("<p>");
+    forecastHumi.text(`Humidity: `);
+
+    forecastDeck.append(forecastCard);
+    forecastCard.append(forecastCardBody);
+    forecastCardBody.append(
+      forecastDate,
+      forecastTemp,
+      forecastWind,
+      forecastHumi
+    );
+  }
 }
 
 function renderCityButtons() {
@@ -99,6 +102,7 @@ function renderCityButtons() {
   console.log(cityName);
   cityHistory.empty();
 
+  //create a button for every item in array
   for (i = 0; i < cityName.length; i++) {
     let cityButton = $("<li>");
 
@@ -112,9 +116,11 @@ function renderCityButtons() {
   }
 }
 
+//Retrieve past searches when city button is pressed
 function getPastForcast(event) {
   let input = $(event.target).attr("data-city");
   alert("you clicked " + input); //test
+  let apiKey = "&appid=690c3a6b7201e389fe103be085cb462f";
   let queryUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${input}${apiKey}`;
 
   todayDiv.empty();
@@ -146,13 +152,7 @@ function getPastForcast(event) {
 
 //event listeners
 
-searchBtn.on("click", function (event) {
-  event.preventDefault();
-  renderCityButtons();
-  todayDiv.empty();
-  findCity();
-});
-
+searchBtn.on("click", findCity);
 cityHistory.on("click", ".city-btn", getPastForcast);
 
 //geocoding api?
