@@ -35,22 +35,21 @@ function findCity(event) {
     url: queryUrl,
     method: "GET",
   }).then(function (response) {
-    console.log(response); //Test if correct
     //render main forecast
     renderForecast(response);
     //render 5-day forecast
     renderFutureForecast(response);
-  });
 
-  //If input is empty or has already been searched throw error
-  if (city === "") {
-    alert("Please enter a city name");
-  } else if (cityName.includes(city)) {
-    alert("Please enter a new city name");
-  } else {
-    //generate button into city history
-    renderCityButtons();
-  }
+    //If input is empty or has already been searched throw error
+    if (city === "") {
+      alert("Please enter a city name");
+    } else if (cityName.includes(city)) {
+      alert("Please enter a new city name");
+    } else {
+      //generate button into city history
+      renderCityButtons();
+    }
+  });
 }
 //Main city forecast
 function renderForecast(response) {
@@ -176,23 +175,3 @@ function getPastForcast(event) {
 
 searchBtn.on("click", findCity);
 cityHistory.on("click", ".city-btn", getPastForcast);
-
-//geocoding api?
-// "https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid=" +
-
-/* //Todays forcast
-// let todayCard = $("<div>").attr("class", "card");
-// let todayCardBody = $("<div>").attr("class", "card-body");
-// let cityHeading = $("<h4>").attr("class", "font-weight-bold");
-// cityHeading.text(`${cityName}  ${currentDay}`);
-// let todayTemp = $("<p>");
-// todayTemp.text(`Temp: `);
-// let todayWind = $("<p>");
-// todayWind.text(`Wind: `);
-// let todayHumi = $("<p>");
-// todayHumi.text(`Humidity: `);
-
-// todayDiv.append(todayCard);
-// todayCard.append(todayCardBody);
-// todayCardBody.append(cityHeading, todayTemp, todayWind, todayHumi);
- */
