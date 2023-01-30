@@ -55,6 +55,7 @@ function findCity(event) {
 //Main city forecast
 function renderForecast(response) {
   let currentForecast = response.list[0];
+  // console.log(response);
   //create main forecast elements
   let todayCard = $("<div>").attr("class", "card");
   let todayCardBody = $("<div>").attr("class", "card-body");
@@ -92,46 +93,56 @@ function renderForecast(response) {
 }
 
 //5-Day forecast
+function forecastDate(day) {
+  let forecastDate = moment().add(day, "d").format("YYYY-MM-DD");
+  return forecastDate + " 12:00:00";
+}
+
+function fillForecast(obj) {
+  let forecastDeck = $(".card-deck");
+
+  let forecastCard = $("<div>").attr("class", "card");
+  let forecastCardBody = $("<div>").attr("class", "card-body");
+  let kelToCel = obj.main.temp - 273.15;
+  let celcius = Math.round(kelToCel * 10) / 10;
+
+  let futureDate = $("<h5>");
+  futureDate.text(moment(obj.dt_txt).format("DD/MM/YY"));
+  let futureTemp = $("<p>");
+  futureTemp.text(`Temp: ${celcius}°C`);
+  let futureWind = $("<p>");
+  futureWind.text(`Wind: ${obj.wind.speed}KPH`);
+  let futureHumi = $("<p>");
+  futureHumi.text(`Humidity: ${obj.main.humidity}%`);
+
+  forecastDeck.append(forecastCard);
+  forecastCard.append(forecastCardBody);
+  forecastCardBody.append(futureDate, futureTemp, futureWind, futureHumi);
+}
 
 function renderFutureForecast(response) {
   let forecastHeading = $("<h4>").attr("class", "font-weight-bold");
   forecastHeading.text("5-Day Forecast:");
   let forecastDeck = $("<div>").attr("class", "card-deck");
   forecastDiv.append(forecastHeading, forecastDeck);
+  let forecastList = response.list;
 
-  /*   let forecastList = response.list;
-  //filter next 5 days
-  let forecastListDates = `${moment()
-    .add(i + 1, "d")
-    .format("YYYY-MM-DD")} 12:00:00`;
-
-  //filter through response to retrieve a certain time - using midday to test
-  let filteredDates = forecastList.filter(function midDay(list) {
-    return list.dt_txt === forecastListDates;
-  });
-  console.log(filteredDates[0]); */
-
-  for (let i = 0; i < 5; i++) {
-    let forecastCard = $("<div>").attr("class", "card");
-    let forecastCardBody = $("<div>").attr("class", "card-body");
-
-    //forecast card information
-    let forecastDate = moment()
-      .add(i + 1, "d")
-      .format("DD/MM/YY");
-    let futureDate = $("<h5>");
-    futureDate.text(forecastDate);
-    let futureTemp = $("<p>");
-    futureTemp.text(`Temp: `);
-    let futureWind = $("<p>");
-    futureWind.text(`Wind: `);
-    let futureHumi = $("<p>");
-    futureHumi.text(`Humidity: `);
-
-    //append info to cards, cards to forecast deck
-    forecastDeck.append(forecastCard);
-    forecastCard.append(forecastCardBody);
-    forecastCardBody.append(futureDate, futureTemp, futureWind, futureHumi);
+  for (let i = 1; i < forecastList.length; i++) {
+    if (forecastDate(1) === forecastList[i].dt_txt) {
+      fillForecast(forecastList[i]);
+    }
+    if (forecastDate(2) === forecastList[i].dt_txt) {
+      fillForecast(forecastList[i]);
+    }
+    if (forecastDate(3) === forecastList[i].dt_txt) {
+      fillForecast(forecastList[i]);
+    }
+    if (forecastDate(4) === forecastList[i].dt_txt) {
+      fillForecast(forecastList[i]);
+    }
+    if (forecastDate(5) === forecastList[i].dt_txt) {
+      fillForecast(forecastList[i]);
+    }
   }
 }
 
