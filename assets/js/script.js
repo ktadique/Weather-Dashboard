@@ -127,21 +127,12 @@ function renderFutureForecast(response) {
   forecastDiv.append(forecastHeading, forecastDeck);
   let forecastList = response.list;
 
+  let dayFlag = 1;
+
   for (let i = 1; i < forecastList.length; i++) {
-    if (forecastDate(1) === forecastList[i].dt_txt) {
+    if (forecastDate(dayFlag) === forecastList[i].dt_txt) {
       fillForecast(forecastList[i]);
-    }
-    if (forecastDate(2) === forecastList[i].dt_txt) {
-      fillForecast(forecastList[i]);
-    }
-    if (forecastDate(3) === forecastList[i].dt_txt) {
-      fillForecast(forecastList[i]);
-    }
-    if (forecastDate(4) === forecastList[i].dt_txt) {
-      fillForecast(forecastList[i]);
-    }
-    if (forecastDate(5) === forecastList[i].dt_txt) {
-      fillForecast(forecastList[i]);
+      dayFlag++;
     }
   }
 }
