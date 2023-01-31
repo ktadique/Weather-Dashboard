@@ -23,6 +23,18 @@ let cityHistory = $("#history");
 let searchBtn = $("#search-button");
 let cityNames = [];
 
+init();
+
+function init() {
+  let storedCity = JSON.parse(localStorage.getItem("cityHistory"));
+
+  //check if there is an item in local storage
+  if (storedCity) {
+    cityNames = storedCity;
+  }
+  renderCityButtons();
+}
+
 function findCity(event) {
   event.preventDefault();
   let city = $("#search-input").val();
@@ -48,6 +60,8 @@ function findCity(event) {
     } else {
       //push input into cityNames array
       cityNames.push(city);
+      // save citynames array into local storage
+      localStorage.setItem("cityHistory", JSON.stringify(cityNames));
       //render city button
       renderCityButtons();
     }
