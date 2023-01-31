@@ -21,17 +21,27 @@ let todayDiv = $("#today");
 let forecastDiv = $("#forecast");
 let cityHistory = $("#history");
 let searchBtn = $("#search-button");
+let inputGroup = $(".input-group");
 let cityNames = [];
 
 init();
 
 function init() {
-  let storedCity = JSON.parse(localStorage.getItem("cityHistory"));
+  //get stored cities from local storage
+  let storedCity = JSON.parse(localStorage.getItem("History"));
 
   //check if there is an item in local storage
   if (storedCity) {
     cityNames = storedCity;
   }
+  //create a button to clear localStorage cache
+  let deleteBtn = $("<button>").attr(
+    "class",
+    "btn btn-block btn-danger delete-btn"
+  );
+  deleteBtn.text("Clear");
+  inputGroup.append(deleteBtn);
+
   renderCityButtons();
 }
 
@@ -61,19 +71,30 @@ function findCity(event) {
       //push input into cityNames array
       cityNames.push(city);
       // save citynames array into local storage
-      localStorage.setItem("cityHistory", JSON.stringify(cityNames));
+      localStorage.setItem("History", JSON.stringify(cityNames));
       //render city button
       renderCityButtons();
     }
   });
 }
+
 //Main city forecast
 function renderForecast(response) {
   let currentForecast = response.list[0];
   console.log(response);
   //create main forecast elements
-  let todayCard = $("<div>").attr("class", "card text-white shadow bg-info");
-  let todayCardBody = $("<div>").attr("class", "card-body");
+  let todayCard = $("<div>").attr(
+    "class",
+    "card text-white shadow bg-secondary"
+  );
+  let todayCardBody = $("<div>").attr(
+    "class",
+    "card-body rounded-bottom bg-light"
+  );
+  let todayCardHeader = $("<div>").attr("class", "card-header");
+  let rowDiv = $("<div>").attr("class", "row");
+  let iconDiv = $("<div>").attr("class", "col-2 border-secondary border-right");
+  let contentDiv = $("<div>").attr("class", "text-dark col-10");
 
   //main forecast information
   //heading
@@ -91,8 +112,9 @@ function renderForecast(response) {
   icon.attr({
     src: `http://openweathermap.org/img/wn/${fcIcon}@2x.png`,
     alt: `${currentForecast.weather[0].description}`,
+    class: "mx-auto d-block",
   });
-  cityHeading.append(icon);
+  // cityHeading.append(icon);
   //wind
   let todayWind = $("<p>");
   todayWind.text(`Wind: ${currentForecast.wind.speed} KPH`);
@@ -102,14 +124,19 @@ function renderForecast(response) {
 
   //append elements
   todayDiv.append(todayCard);
-  todayCard.append(todayCardBody);
-  todayCardBody.append(cityHeading, todayTemp, todayWind, todayHumi);
+  todayCard.append(todayCardHeader, todayCardBody);
+  todayCardHeader.append(cityHeading);
+  todayCardBody.append(rowDiv);
+  rowDiv.append(iconDiv, contentDiv);
+  contentDiv.append(todayTemp, todayWind, todayHumi);
+  iconDiv.append(icon);
 }
 
 //5-Day forecast
 function forecastDate(day) {
+  //create a forecast date to compare against
   let forecastDate = moment().add(day, "d").format("YYYY-MM-DD");
-  return forecastDate + " 12:00:00";
+  return `${forecastDate} 12:00:00`;
 }
 
 function renderFutureForecast(response) {
@@ -123,15 +150,20 @@ function renderFutureForecast(response) {
 
   for (let i = 1; i < forecastList.length; i++) {
     if (forecastDate(dayFlag) === forecastList[i].dt_txt) {
-      fillForecastCard(forecastList[i]);
+      //if above is true, create the 5 day forcast using the forecast list
+      fillFutureForecastCard(forecastList[i]);
+      //increment the day by 1
       dayFlag++;
     }
   }
 }
 
-function fillForecastCard(obj) {
+function fillFutureForecastCard(obj) {
   let forecastDeck = $(".card-deck");
-  let forecastCard = $("<div>").attr("class", "bg-info text-white shadow card");
+  let forecastCard = $("<div>").attr(
+    "class",
+    "bg-secondary text-white shadow card"
+  );
   let forecastCardBody = $("<div>").attr("class", "card-body");
 
   //temp conversion
@@ -139,8 +171,11 @@ function fillForecastCard(obj) {
   let celcius = Math.round(kelToCel * 10) / 10;
 
   //forecast heading
-  let cardHeader = $("<div>").attr("class", "card-header");
-  let futureDate = $("<h5>").attr("class", "text-center font-weight-bold");
+  let cardHeader = $("<div>").attr("class", "card-header bg-light");
+  let futureDate = $("<h5>").attr(
+    "class",
+    "text-center text-dark font-weight-bold"
+  );
   futureDate.text(moment(obj.dt_txt).format("DD/MM/YY"));
   //weather icon
   let icon = $("<img>");
@@ -180,8 +215,14 @@ function renderCityButtons() {
   }
 }
 
+//Function to clear localStorage
+function clearHistory() {
+  localStorage.removeItem("History");
+}
+
 //Retrieve past searches when city button is pressed
 function getPastForcast(event) {
+  event.preventDefault();
   let city = $(event.target).attr("data-city");
   // alert("you clicked " + city); //test
   let apiKey = "&appid=690c3a6b7201e389fe103be085cb462f";
@@ -199,6 +240,6 @@ function getPastForcast(event) {
 }
 
 //event listeners
-
 searchBtn.on("click", findCity);
 cityHistory.on("click", ".city-btn", getPastForcast);
+inputGroup.on("click", ".delete-btn", clearHistory);
