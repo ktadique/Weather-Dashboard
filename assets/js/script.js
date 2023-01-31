@@ -58,7 +58,7 @@ function renderForecast(response) {
   let currentForecast = response.list[0];
   console.log(response);
   //create main forecast elements
-  let todayCard = $("<div>").attr("class", "card ");
+  let todayCard = $("<div>").attr("class", "card text-white shadow bg-info");
   let todayCardBody = $("<div>").attr("class", "card-body");
 
   //main forecast information
@@ -109,18 +109,15 @@ function renderFutureForecast(response) {
 
   for (let i = 1; i < forecastList.length; i++) {
     if (forecastDate(dayFlag) === forecastList[i].dt_txt) {
-      fillForecast(forecastList[i]);
+      fillForecastCard(forecastList[i]);
       dayFlag++;
     }
   }
 }
 
-function fillForecast(obj) {
+function fillForecastCard(obj) {
   let forecastDeck = $(".card-deck");
-  let forecastCard = $("<div>").attr(
-    "class",
-    "bg-secondary text-white shadow card"
-  );
+  let forecastCard = $("<div>").attr("class", "bg-info text-white shadow card");
   let forecastCardBody = $("<div>").attr("class", "card-body");
 
   //temp conversion
